@@ -68,7 +68,7 @@ client.on('message', (message) => {
             const data = response.data;
             const img = data.img;
             const coordinates = data.coordinates;
-            let weapons = \[];
+            let weapons = [];
             let text = '解析完了！\\n';
 
             // コロシアムスキル
@@ -194,22 +194,22 @@ function getSkillsTag(skills) {
   for (let i = 0; i &lt; skills.length; i++) {
     let key = skills[i];
     // ソート用に一旦置換する
-    key = key.replace('壱', '\_1');
-    key = key.replace('弐', '\_2');
-    key = key.replace('参', '\_3');
+    key = key.replace('壱', '_1');
+    key = key.replace('弐', '_2');
+    key = key.replace('参', '_3');
     if (obj[key] === undefined) obj[key] = 0;
     obj[key]++;
   }
   obj = objectSort(obj);
 
-  const skill_disp = \[];
+  const skill_disp = [];
   for (let i = 0; i &lt; Object.keys(obj).length; i++) {
     const skill = Object.keys(obj)[i];
     if (skill === '') continue;
     // ソート用に置換したものを戻す
-    let skill_after = skill.replace('\_1', '壱');
-    skill_after = skill_after.replace('\_2', '弐');
-    skill_after = skill_after.replace('\_3', '参');
+    let skill_after = skill.replace('_1', '壱');
+    skill_after = skill_after.replace('_2', '弐');
+    skill_after = skill_after.replace('_3', '参');
     skill_disp[i] = skill_after + '：' + obj[skill];
   }
   return skill_disp;
@@ -218,7 +218,7 @@ function getSkillsTag(skills) {
 // オブジェクトをソート
 function objectSort(object) {
   let sorted = {};
-  let array = \[];
+  let array = [];
   for (let key in object) {
     if (Object.prototype.hasOwnProperty.call(object, key)) {
       array.push(key);
@@ -226,7 +226,7 @@ function objectSort(object) {
   }
   array.sort();
   for (let i = 0; i &lt; array.length; i++) {
-    sorted\[array[i]] = object\[array[i]];
+    sorted[array[i]] = object[array[i]];
   }
   return sorted;
 }
