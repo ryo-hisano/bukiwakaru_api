@@ -74,7 +74,7 @@ client.on('message', (message) => {
             // コロシアムスキル
             let col_gvg_skills = [];
 
-            // コロシアムスキル
+            // コロシアム補助スキル
             let col_gvgaid_skills = [];
 
             const loop = async () => {
@@ -86,8 +86,9 @@ client.on('message', (message) => {
                   .get(url)
                   .then((response) => {
                     const weapon = response.data;
+                    // 武器の入っていないマス対応
                     if (response.data.error) return;
-                    //console.log(weapon);
+                    //console.log(response);
                     weapons[i] = `【${weapon.name}】${weapon.gvg_skill},${weapon.gvg2_skill},${returnAttribute(weapon.attribute)}`;
                     col_gvg_skills.push(weapon.gvg_skill);
                     col_gvgaid_skills.push(weapon.gvg2_skill);
@@ -100,40 +101,64 @@ client.on('message', (message) => {
                     },${returnRarity(weapon.rarity)}`;*/
                   })
                   .catch((error) => {
-                    console.log(error);
-                    message.reply(error);
+                    console.log('内err : ' + error.response);
+                    //message.reply(error);
                   });
                 await sleep();
               }
             };
             loop().then(() => {
-              //console.log(weapons);
-              //console.log(col_gvgaid_skills);
-              weapons.forEach(
-                (weapon) => (text += weapon + '\n')
-                //console.log(weapon)
-              );
+              if (weapons.length > 0) {
+                weapons.forEach((weapon) => (text += weapon + '\n'));
 
-              text += '\n【コロシアムスキル】\n';
+                text += '\n【コロシアムスキル】\n';
 
-              getSkillsTag(col_gvg_skills).forEach(
-                (skill) => (text += skill + '\n')
-                //console.log(weapon)
-              );
+                // コロシアムスキル名配列
+                const col_skill_names = returnSkillNames(col_gvg_skills);
 
-              text += '\n【コロシアム補助スキル】\n';
+                // コロシアムスキル配列
+                var col_skills = getSkillsTag(col_gvg_skills);
 
-              getSkillsTag(col_gvgaid_skills).forEach(
-                (skill) => (text += skill + '\n')
-                //console.log(weapon)
-              );
+                // コロシアムスキル名でグループ化
+                col_skill_names.forEach(function(skill_name, index) {
+                  let skill_text = '';
+                  col_skills.forEach(function(skill) {
+                    if (skill.indexOf(skill_name) !== -1) {
+                      skill_text += skill + ' / ';
+                    }
+                  });
+                  text += skill_text.slice(0, -3) + '\n';
+                });
 
-              message.reply(text);
+                text += '\n【コロシアム補助スキル】\n';
+
+                // コロシアム補助スキル名配列
+                const col_aid_skill_names = returnSkillNames(col_gvgaid_skills);
+
+                // コロシアム補助スキル配列
+                var col_aid_skills = getSkillsTag(col_gvgaid_skills);
+
+                // コロシアム補助スキル名でグループ化
+                col_aid_skill_names.forEach(function(skill_name, index) {
+                  let skill_text = '';
+                  col_aid_skills.forEach(function(skill) {
+                    if (skill.indexOf(skill_name) !== -1) {
+                      skill_text += skill + ' / ';
+                    }
+                  });
+                  text += skill_text.slice(0, -3) + '\n';
+                });
+
+                // テキスト連結
+                message.channel.send(text);
+              } else {
+                message.channel.send('エラーが発生しました。しばらく時間をおいてから再度お願いします。');
+              }
             });
           })
           .catch((error) => {
-            console.log(error);
-            message.reply(error);
+            console.log('外err : ' + error.response);
+            //message.reply(error);
           });
       });
     }
@@ -231,5 +256,20 @@ function objectSort(object) {
   return sorted;
 }
 
+// スキル名配列を返す
+function returnSkillNames(array) {
+  // 例：補助支援(弐)を補助支援に
+  const array_before = array.map((skill) => skill.replace(/((.))/g, ''));
+
+  // 重複を削除したリスト
+  let array_after = array_before.filter(function(x, i, self) {
+    return self.indexOf(x) === i;
+  });
+
+  array_after.sort();
+  return array_after;
+}
+
 client.login(process.env.DISCORD_BOT_TOKEN);
+
 ```
