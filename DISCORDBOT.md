@@ -101,7 +101,6 @@ client.on('message', (message) => {
                     },${returnRarity(weapon.rarity)}`;*/
                   })
                   .catch((error) => {
-                    console.log('内err : ' + error.response);
                     //message.reply(error);
                   });
                 await sleep();
@@ -157,17 +156,11 @@ client.on('message', (message) => {
             });
           })
           .catch((error) => {
-            console.log('外err : ' + error.response);
             //message.reply(error);
           });
       });
     }
-
   }
-  /_if (message.isMemberMentioned(client.user)) {
-    message.reply("呼びましたか？");
-    return;
-  }_/
 });
 
 if (process.env.DISCORD_BOT_TOKEN == undefined) {
