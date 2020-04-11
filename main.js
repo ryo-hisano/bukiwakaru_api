@@ -82,7 +82,9 @@ client.on("message", message => {
           col_aid_skill_flag = false;
         }
         if (
-          /s|summary|さまり|サマリ|がいよう|概要|ぶき|武器/gi.test(message.content)
+          /s|summary|さまり|サマリ|がいよう|概要|ぶき|武器/gi.test(
+            message.content
+          )
         ) {
           summary_flag = true;
         }
@@ -158,17 +160,17 @@ client.on("message", message => {
                   text += "【コロシアムスキル】\n";
 
                   // コロシアムスキル名配列
-                  //const col_skill_names = returnSkillNames(col_gvg_skills);
+                  const col_skill_names = returnSkillNames(col_gvg_skills);
 
                   // コロシアムスキル配列
                   var col_skills = getSkillsTag(col_gvg_skills);
 
-                  col_skills.forEach(function(skill, index) {
-                    text += skill + "\n";
-                  });
+                  /*col_skills.forEach(function(skill, index) {
+										text += skill + '\n';
+									});*/
 
                   // コロシアムスキル名でグループ化
-                  /*col_skill_names.forEach(function(skill_name, index) {
+                  col_skill_names.forEach(function(skill_name, index) {
                     let skill_text = "";
                     col_skills.forEach(function(skill) {
                       if (skill.indexOf(skill_name) !== -1) {
@@ -176,7 +178,7 @@ client.on("message", message => {
                       }
                     });
                     text += skill_text.slice(0, -3) + "\n";
-                  });*/
+                  });
                   text += "\n";
                 }
 
@@ -184,19 +186,19 @@ client.on("message", message => {
                   text += "【コロシアム補助スキル】\n";
 
                   // コロシアム補助スキル名配列
-                  /*const col_aid_skill_names = returnSkillNames(
+                  const col_aid_skill_names = returnSkillNames(
                     col_gvgaid_skills
-                  );*/
+                  );
 
                   // コロシアム補助スキル配列
                   var col_aid_skills = getSkillsTag(col_gvgaid_skills);
 
-                  col_aid_skills.forEach(function(skill, index) {
-                    text += skill + "\n";
-                  });
+                  /*col_aid_skills.forEach(function(skill, index) {
+										text += skill + '\n';
+									});*/
 
                   // コロシアム補助スキル名でグループ化
-                  /*col_aid_skill_names.forEach(function(skill_name, index) {
+                  col_aid_skill_names.forEach(function(skill_name, index) {
                     let skill_text = "";
                     col_aid_skills.forEach(function(skill) {
                       if (skill.indexOf(skill_name) !== -1) {
@@ -204,7 +206,7 @@ client.on("message", message => {
                       }
                     });
                     text += skill_text.slice(0, -3) + "\n";
-                  });*/
+                  });
                 }
 
                 // テキスト連結
@@ -321,7 +323,10 @@ function objectSort(object) {
 // スキル名配列を返す
 function returnSkillNames(array) {
   // 例：補助支援(弐)を補助支援に
-  const array_before = array.map(skill => skill.replace(/\((.)\)/g, ""));
+  const array_before = array.map(function(skill) {
+    skill = skill.replace(/(\((.)\)$|\/生|\/死|\/序曲|\/終曲)/g, "");
+    return skill;
+  });
 
   // 重複を削除したリスト
   let array_after = array_before.filter(function(x, i, self) {
@@ -329,6 +334,7 @@ function returnSkillNames(array) {
   });
 
   array_after.sort();
+  console.log(array_after);
   return array_after;
 }
 
