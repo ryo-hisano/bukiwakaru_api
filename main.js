@@ -25,12 +25,13 @@ client.on('message', (message) => {
 
 	if (message.isMemberMentioned(client.user)) {
 		if (/help|HELP|へるぷ|ヘルプ/gi.test(message.content)) {
-			let bot_message = 'コマンド一覧は下記です（2020/04/11）。\n';
+			let bot_message = 'コマンド一覧は下記です（2020/04/12）。\n';
 			bot_message += '```';
 			bot_message += 'l|L\n調べる武器をL武器に絞ることで、処理時間が約半分以下と高速になります。\n\n';
 			bot_message += 's|summary|さまり|サマリ|がいよう|概要|ぶき|武器\nサマリ（【武器名】,コロシアムスキル,コロシアム補助スキル,属性）を表示します。\n\n';
 			bot_message += 'c|C|ころ|コロ\nコロシアムスキルとその数を表示します。\n\n';
 			bot_message += 'h|補助|ほじょ|ほ\nコロシアム補助スキルとその数を表示します。\n\n';
+			bot_message += 'k|殻|から|カラ\n（スキルカスタマイズしている方用）殻武器のデフォルトスキルを表示・加算しないようにします。\n\n';
 			bot_message += 'コマンドは複数組み合わせ可能です。\n例：@ぶきわかるくん lh（画像添付）、@ぶきわかるくん L武器サマリ（画像添付）';
 			bot_message += '```';
 			message.reply(bot_message);
@@ -47,6 +48,9 @@ client.on('message', (message) => {
 	let summary_flag = true;
 	let col_skill_flag = true;
 	let col_aid_skill_flag = true;
+
+	// 殻武器除外フラグ
+	let custom_flag = false;
 
 	// bot宛かつ画像添付時
 	if (message.isMemberMentioned(client.user) && message.attachments.size > 0) {
@@ -76,6 +80,9 @@ client.on('message', (message) => {
 				}
 				if (/h|補助|ほじょ|ほ/gi.test(message.content)) {
 					col_aid_skill_flag = true;
+				}
+				if (/k|殻|から|カラ/gi.test(message.content)) {
+					custom_flag = true;
 				}
 
 				const url = `https://bukiwakaru.herokuapp.com/api/measurement?key=${api_key}&img=${attachment.url}`;
@@ -116,11 +123,17 @@ client.on('message', (message) => {
 										const weapon = response.data;
 										// 武器の入っていないマス対応
 										if (response.data.error) return;
-										//console.log(response);
-										weapons[i] = `【${weapon.name}】${weapon.gvg_skill},${weapon.gvg2_skill},${returnAttribute(weapon.attribute)},${returnEqType(weapon.eq_type)}`;
 
-										col_gvg_skills[weapon.eq_type - 1][i] = weapon.gvg_skill;
-										col_gvgaid_skills.push(weapon.gvg2_skill);
+										// 殻武器無視判定
+										if (custom_flag && weapon.name.indexOf('殻ノ') !== -1) {
+											weapons[i] = `【${weapon.name}】---,---,${returnAttribute(weapon.attribute)},${returnEqType(weapon.eq_type)}`;
+											col_gvg_skills[weapon.eq_type - 1][i] = '（' + weapon.name + '）のコロシアムスキル';
+											col_gvgaid_skills.push('（' + weapon.name + '）のコロシアム補助スキル');
+										} else {
+											weapons[i] = `【${weapon.name}】${weapon.gvg_skill},${weapon.gvg2_skill},${returnAttribute(weapon.attribute)},${returnEqType(weapon.eq_type)}`;
+											col_gvg_skills[weapon.eq_type - 1][i] = weapon.gvg_skill;
+											col_gvgaid_skills.push(weapon.gvg2_skill);
+										}
 									})
 									.catch((error) => {
 										//console.log('内err : ' + error.response);
@@ -176,10 +189,11 @@ client.on('message', (message) => {
 
 										// コロシアムスキル名でグループ化
 										col_skill_names.forEach(function(skill_name) {
-											let skill_text = '';
+											let skill_text = skill_name;
 											col_skills.forEach(function(skill) {
 												if (skill.indexOf(skill_name) !== -1) {
-													skill_text += skill + ' / ';
+													skill_text += skill.replace(skill_name, '') + ' / ';
+													skill_text = skill_text.replace('/ /', '/ ');
 													const weapon_num = skill.match(/\d+$/);
 													weapons_num += weapon_num ? Number(weapon_num[0]) : 0;
 												}
@@ -199,16 +213,13 @@ client.on('message', (message) => {
 									// コロシアム補助スキル配列
 									var col_aid_skills = getSkillsTag(col_gvgaid_skills);
 
-									/*col_aid_skills.forEach(function(skill, index) {
-										text += skill + '\n';
-									});*/
-
 									// コロシアム補助スキル名でグループ化
 									col_aid_skill_names.forEach(function(skill_name, index) {
-										let skill_text = '';
+										let skill_text = skill_name;
 										col_aid_skills.forEach(function(skill) {
 											if (skill.indexOf(skill_name) !== -1) {
-												skill_text += skill + ' / ';
+												skill_text += skill.replace(skill_name, '') + ' / ';
+												skill_text = skill_text.replace('/ /', '/ ');
 											}
 										});
 										text += skill_text.slice(0, -3) + '\n';
@@ -325,7 +336,7 @@ function objectSort(object) {
 function returnSkillNames(array) {
 	// 例：補助支援(弐)を補助支援に
 	const array_before = array.map(function(skill) {
-		skill = skill.replace(/(\((.)\)$|\/生|\/死|\/序曲|\/終曲)/g, '');
+		skill = skill.replace(/(\((.)\)$|\/生|\/死|\/序曲|\/終曲|\/剣戟|\/銃撃|\/攻上|\/攻下)/g, '');
 		return skill;
 	});
 
