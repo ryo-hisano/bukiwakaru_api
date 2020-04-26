@@ -14,6 +14,10 @@
 
 ```json
 {
+  "character": {
+    "character_id": 126,
+    "eq_type": 5
+  },
   "coordinates": [
     {
       "x": 8,
@@ -128,7 +132,8 @@
 
 ## 武器認識 API
 
-「矩形探査 API」にて取得した img パラメータ及び、X 座標・Y 座標をそれぞれ x・y パラメータで指定します。
+「矩形探査 API」にて取得した img パラメータ及び、X 座標・Y 座標をそれぞれ x・y パラメータで指定します。  
+`character.eq_type` がある場合は、その値を&w=X で送ってやることで前衛か後衛かを判定し、探査する武器種をおよそ半分に減らせます。
 
 `https://bukiwakaru.herokuapp.com/api/recognition?key={API_KEY}&i=20200407082353f2JDr&x=8&y=219\`
 
